@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,17 +50,6 @@
             background-color: #f0f9ff;
         }
         
-        .dashboard-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 28px;
-        }
-        
         .login-container {
             background: white;
             border-radius: 16px;
@@ -88,6 +77,36 @@
             width: 4px;
             background-color: var(--primary);
             border-radius: 4px;
+        }
+        
+        .admin-panel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            width: 90%;
+            max-width: 500px;
+        }
+        
+        .admin-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        
+        .admin-panel.active, .admin-overlay.active {
+            display: block;
         }
         
         @media (max-width: 768px) {
@@ -122,8 +141,6 @@
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 md:p-6">
-    <div class="overlay"></div>
-
     <!-- Login Screen -->
     <div id="loginScreen" class="login-container w-full max-w-md p-6 md:p-8">
         <div class="text-center mb-8">
@@ -133,39 +150,33 @@
             <p class="text-gray-600 mt-2">Hospital Management System</p>
         </div>
 
-        <div class="mb-6">
-            <label class="block text-gray-700 text-sm font-medium mb-2" for="hospitalCode">
-                Hospital Code
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="userName">
+                আপনার নাম
             </label>
-            <input id="hospitalCode" type="text" placeholder="Enter your hospital code" 
+            <input id="userName" type="text" placeholder="আপনার নাম লিখুন" 
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
         </div>
 
-        <div id="userFields">
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-medium mb-2" for="userName">
-                    Your Name
-                </label>
-                <input id="userName" type="text" placeholder="Enter your name" 
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="userPhone">
+                ফোন নম্বর
+            </label>
+            <input id="userPhone" type="text" placeholder="আপনার ফোন নম্বর লিখুন" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
 
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-medium mb-2" for="userPhone">
-                    Phone Number
-                </label>
-                <input id="userPhone" type="text" placeholder="Enter your phone number" 
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="hospitalCode">
+                হাসপাতাল কোড
+            </label>
+            <input id="hospitalCode" type="text" placeholder="হাসপাতাল কোড লিখুন" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
         </div>
 
         <button id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
-            <i class="fas fa-sign-in-alt"></i> Login to System
+            <i class="fas fa-sign-in-alt"></i> লগইন করুন
         </button>
-
-        <div class="text-center mt-6 text-sm text-gray-600">
-            <p>Demo Login: Use code <span class="font-semibold">HPL123</span></p>
-        </div>
     </div>
 
     <!-- Main Application -->
@@ -185,6 +196,9 @@
                     <p class="font-medium" id="headerUserName">User Name</p>
                     <p class="text-sm text-gray-600" id="headerHospitalCode">Hospital: HPL123</p>
                 </div>
+                <button onclick="openAdminAccess()" class="bg-blue-100 text-blue-600 hover:bg-blue-200 py-2 px-3 rounded-lg transition duration-200 flex items-center gap-2">
+                    <i class="fas fa-cog"></i> <span class="hidden md:inline">Admin</span>
+                </button>
                 <button onclick="logout()" class="bg-red-100 text-red-600 hover:bg-red-200 py-2 px-4 rounded-lg transition duration-200 flex items-center gap-2">
                     <i class="fas fa-sign-out-alt"></i> <span class="hidden md:inline">Logout</span>
                 </button>
@@ -210,8 +224,8 @@
                     <div class="nav-item">
                         <i class="fas fa-file-invoice-dollar mr-3 text-red-600"></i> Billing
                     </div>
-                    <div class="nav-item">
-                        <i class="fas fa-cog mr-3 text-gray-600"></i> Settings
+                    <div class="nav-item" onclick="openAdminAccess()">
+                        <i class="fas fa-lock mr-3 text-gray-600"></i> Admin Panel
                     </div>
                 </nav>
             </aside>
@@ -221,9 +235,6 @@
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-xl font-bold text-gray-800">Medicine Search</h2>
-                        <button class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center gap-2" onclick="openAdmin()">
-                            <i class="fas fa-plus"></i> New Medicine
-                        </button>
                     </div>
 
                     <div class="mb-6 relative">
@@ -283,54 +294,86 @@
         </div>
     </div>
 
-    <!-- Admin Modal -->
-    <div id="adminModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Add New Medicine</h3>
-                <button onclick="closeAdmin()" class="text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-gray-700 text-sm font-medium mb-2" for="medName">
-                        Medicine Name
-                    </label>
-                    <input id="medName" type="text" placeholder="Enter medicine name" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                
-                <div>
-                    <label class="block text-gray-700 text-sm font-medium mb-2" for="medStrength">
-                        Strength
-                    </label>
-                    <input id="medStrength" type="text" placeholder="Enter strength (e.g., 500mg, 10mg)" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                
-                <div>
-                    <label class="block text-gray-700 text-sm font-medium mb-2" for="medMRP">
-                        MRP
-                    </label>
-                    <input id="medMRP" type="number" step="0.01" placeholder="Enter MRP" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-            </div>
-            
-            <div class="mt-6 flex justify-end gap-3">
-                <button onclick="closeAdmin()" class="bg-gray-200 text-gray-800 hover:bg-gray-300 py-2 px-4 rounded-lg font-medium transition duration-200">
-                    Cancel
-                </button>
-                <button onclick="addMedicine()" class="bg-blue-600 text-white hover:bg-blue-700 py-2 px-4 rounded-lg font-medium transition duration-200 flex items-center gap-2">
-                    <i class="fas fa-plus"></i> Add Medicine
-                </button>
+    <!-- Admin Access Modal -->
+    <div class="admin-overlay" id="adminOverlay"></div>
+    <div class="admin-panel" id="adminAccessPanel">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-800">Admin Access</h3>
+            <button onclick="closeAdminAccess()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="adminCode">
+                Admin Code
+            </label>
+            <input id="adminCode" type="password" placeholder="Enter admin code" 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="adminHospitalCode">
+                Hospital Code
+            </label>
+            <input id="adminHospitalCode" type="text" placeholder="Enter hospital code" 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        
+        <button onclick="verifyAdminAccess()" class="w-full bg-blue-600 text-white hover:bg-blue-700 py-2 px-4 rounded-lg font-medium transition duration-200">
+            Verify Access
+        </button>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div class="admin-panel" id="adminPanel">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-800">Admin Panel - <span id="adminHospitalName"></span></h3>
+            <button onclick="closeAdminPanel()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="medName">
+                Medicine Name
+            </label>
+            <input id="medName" type="text" placeholder="Enter medicine name" 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="medStrength">
+                Strength
+            </label>
+            <input id="medStrength" type="text" placeholder="Enter strength (e.g., 500mg, 10mg)" 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="medMRP">
+                MRP
+            </label>
+            <input id="medMRP" type="number" step="0.01" placeholder="Enter MRP" 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        
+        <button onclick="addMedicine()" class="w-full bg-blue-600 text-white hover:bg-blue-700 py-2 px-4 rounded-lg font-medium transition duration-200">
+            Add Medicine
+        </button>
+        
+        <div class="mt-6">
+            <h4 class="text-lg font-semibold text-gray-800 mb-2">Current Medicines</h4>
+            <div class="overflow-y-auto max-h-60" id="adminMedicinesList">
+                <!-- Medicines list will be populated here -->
             </div>
         </div>
     </div>
 
     <script>
+        // Valid hospital codes
+        const validHospitalCodes = ["hpl123", "hpl234", "hpl345", "hpl456", "hpl567", "hpl678", "hpl789", "hpl8910"];
+        
         // DOM elements
         const loginScreen = document.getElementById('loginScreen');
         const appScreen = document.getElementById('appScreen');
@@ -343,22 +386,25 @@
         const menuBtn = document.getElementById('menuBtn');
         const sidebar = document.querySelector('.sidebar');
         const overlay = document.querySelector('.overlay');
-        const adminModal = document.getElementById('adminModal');
+        const adminAccessPanel = document.getElementById('adminAccessPanel');
+        const adminOverlay = document.getElementById('adminOverlay');
+        const adminPanel = document.getElementById('adminPanel');
         
-        // Sample medicine data
-        let medicines = [
-            { id: 1, name: "Paracetamol", strength: "500mg", mrp: 5.20 },
-            { id: 2, name: "CTZ", strength: "10mg", mrp: 8.50 },
-            { id: 3, name: "Multiprex", strength: "Tablet", mrp: 12.00 },
-            { id: 4, name: "Napa", strength: "500mg", mrp: 6.00 },
-            { id: 5, name: "Ace", strength: "650mg", mrp: 7.50 },
-            { id: 6, name: "Antacid", strength: "400mg", mrp: 3.20 },
-            { id: 7, name: "Omeprazole", strength: "20mg", mrp: 9.80 },
-            { id: 8, name: "Amoxicillin", strength: "250mg", mrp: 15.40 }
-        ];
+        // Sample medicine data for each hospital
+        let hospitalsData = {};
+        
+        // Initialize with sample data for each hospital
+        validHospitalCodes.forEach(code => {
+            hospitalsData[code] = [
+                { id: 1, name: "Paracetamol", strength: "500mg", mrp: 5.20 },
+                { id: 2, name: "CTZ", strength: "10mg", mrp: 8.50 },
+                { id: 3, name: "Multiprex", strength: "Tablet", mrp: 12.00 }
+            ];
+        });
         
         // Cart data
         let cart = {};
+        let currentHospitalCode = '';
         
         // Initialize the application
         function initApp() {
@@ -366,6 +412,7 @@
             const isLoggedIn = localStorage.getItem('medlab_loggedIn');
             
             if (isLoggedIn) {
+                currentHospitalCode = localStorage.getItem('medlab_hospitalCode');
                 showAppScreen();
             } else {
                 showLoginScreen();
@@ -383,31 +430,34 @@
                 cart = JSON.parse(savedCart);
             }
             
-            // Render initial medicine table
-            renderMedicineTable(medicines);
+            // Render initial medicine table if logged in
+            if (isLoggedIn) {
+                renderMedicineTable(hospitalsData[currentHospitalCode]);
+            }
         }
         
         // Handle login
         function handleLogin() {
-            const hospitalCode = hospitalCodeInput.value.trim();
+            const hospitalCode = hospitalCodeInput.value.trim().toLowerCase();
             const userName = userNameInput.value.trim();
             const userPhone = userPhoneInput.value.trim();
             
             if (!hospitalCode) {
-                alert('Please enter a hospital code');
+                alert('হাসপাতাল কোড দিন');
                 return;
             }
             
-            // Demo code validation
-            if (hospitalCode.toUpperCase() !== 'HPL123') {
-                alert('Invalid hospital code. Please use HPL123 for demo.');
+            if (!validHospitalCodes.includes(hospitalCode)) {
+                alert('অবৈধ হাসপাতাল কোড। বৈধ কোডগুলি: ' + validHospitalCodes.join(', '));
                 return;
             }
             
             if (!userName || !userPhone) {
-                alert('Please enter your name and phone number');
+                alert('আপনার নাম এবং ফোন নম্বর দিন');
                 return;
             }
+            
+            currentHospitalCode = hospitalCode;
             
             // Save to localStorage
             localStorage.setItem('medlab_loggedIn', 'true');
@@ -423,7 +473,7 @@
             const query = searchBox.value.toLowerCase().trim();
             
             if (!query) {
-                renderMedicineTable(medicines);
+                renderMedicineTable(hospitalsData[currentHospitalCode]);
                 return;
             }
             
@@ -451,7 +501,7 @@
                     }
                 }
                 
-                const filteredMedicines = medicines.filter(med => {
+                const filteredMedicines = hospitalsData[currentHospitalCode].filter(med => {
                     const nameMatch = med.name.toLowerCase().includes(searchName);
                     const strengthMatch = searchStrength ? med.strength.toLowerCase().includes(searchStrength) : true;
                     return nameMatch && strengthMatch;
@@ -509,13 +559,13 @@
         
         // Add to cart
         function addToCart(medId) {
-            const input = document.querySelector(`input[onchange="updateRowTotal(this, ${medicines.find(m => m.id === medId).mrp}, ${medId})"]`);
+            const input = document.querySelector(`input[onchange="updateRowTotal(this, ${hospitalsData[currentHospitalCode].find(m => m.id === medId).mrp}, ${medId})"]`);
             const quantity = parseInt(input.value) || 1;
             
             cart[medId] = quantity;
             localStorage.setItem('medlab_cart', JSON.stringify(cart));
             
-            updateRowTotal(input, medicines.find(m => m.id === medId).mrp, medId);
+            updateRowTotal(input, hospitalsData[currentHospitalCode].find(m => m.id === medId).mrp, medId);
             alert('Added to cart successfully!');
         }
         
@@ -557,7 +607,10 @@
             
             // Set user info in header
             document.getElementById('headerUserName').textContent = localStorage.getItem('medlab_userName') || 'User';
-            document.getElementById('headerHospitalCode').textContent = `Hospital: ${localStorage.getItem('medlab_hospitalCode') || 'HPL123'}`;
+            document.getElementById('headerHospitalCode').textContent = `Hospital: ${localStorage.getItem('medlab_hospitalCode') || ''}`;
+            
+            // Render medicines for current hospital
+            renderMedicineTable(hospitalsData[currentHospitalCode]);
         }
         
         // Show login screen
@@ -589,14 +642,79 @@
             overlay.classList.remove('open');
         }
         
-        // Open admin modal
-        function openAdmin() {
-            adminModal.classList.remove('hidden');
+        // Open admin access panel
+        function openAdminAccess() {
+            adminAccessPanel.classList.add('active');
+            adminOverlay.classList.add('active');
         }
         
-        // Close admin modal
-        function closeAdmin() {
-            adminModal.classList.add('hidden');
+        // Close admin access panel
+        function closeAdminAccess() {
+            adminAccessPanel.classList.remove('active');
+            adminOverlay.classList.remove('active');
+        }
+        
+        // Verify admin access
+        function verifyAdminAccess() {
+            const adminCode = document.getElementById('adminCode').value;
+            const hospitalCode = document.getElementById('adminHospitalCode').value.toLowerCase();
+            
+            if (adminCode !== '5656') {
+                alert('Invalid admin code');
+                return;
+            }
+            
+            if (!validHospitalCodes.includes(hospitalCode)) {
+                alert('Invalid hospital code');
+                return;
+            }
+            
+            // Success - open admin panel for this hospital
+            closeAdminAccess();
+            openAdminPanel(hospitalCode);
+        }
+        
+        // Open admin panel
+        function openAdminPanel(hospitalCode = null) {
+            const code = hospitalCode || currentHospitalCode;
+            document.getElementById('adminHospitalName').textContent = code.toUpperCase();
+            adminPanel.classList.add('active');
+            adminOverlay.classList.add('active');
+            
+            // Render medicines list for admin
+            renderAdminMedicinesList(code);
+        }
+        
+        // Close admin panel
+        function closeAdminPanel() {
+            adminPanel.classList.remove('active');
+            adminOverlay.classList.remove('active');
+        }
+        
+        // Render admin medicines list
+        function renderAdminMedicinesList(hospitalCode) {
+            const medicinesList = document.getElementById('adminMedicinesList');
+            medicinesList.innerHTML = '';
+            
+            if (hospitalsData[hospitalCode].length === 0) {
+                medicinesList.innerHTML = '<p class="text-gray-500 text-center py-4">No medicines found</p>';
+                return;
+            }
+            
+            hospitalsData[hospitalCode].forEach(med => {
+                const medElement = document.createElement('div');
+                medElement.className = 'flex justify-between items-center py-2 border-b border-gray-200';
+                medElement.innerHTML = `
+                    <div>
+                        <div class="font-medium">${med.name}</div>
+                        <div class="text-sm text-gray-600">${med.strength} - ₹${med.mrp.toFixed(2)}</div>
+                    </div>
+                    <button class="text-red-500 hover:text-red-700" onclick="deleteMedicine('${hospitalCode}', ${med.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                medicinesList.appendChild(medElement);
+            });
         }
         
         // Add new medicine
@@ -604,6 +722,7 @@
             const name = document.getElementById('medName').value.trim();
             const strength = document.getElementById('medStrength').value.trim();
             const mrp = parseFloat(document.getElementById('medMRP').value);
+            const hospitalCode = currentHospitalCode;
             
             if (!name || !strength || isNaN(mrp)) {
                 alert('Please fill all fields correctly');
@@ -617,7 +736,7 @@
                 mrp: mrp
             };
             
-            medicines.push(newMed);
+            hospitalsData[hospitalCode].push(newMed);
             alert('Medicine added successfully!');
             
             // Clear form
@@ -625,9 +744,30 @@
             document.getElementById('medStrength').value = '';
             document.getElementById('medMRP').value = '';
             
-            // Close modal and update table
-            closeAdmin();
-            renderMedicineTable(medicines);
+            // Update medicines list
+            renderAdminMedicinesList(hospitalCode);
+            
+            // Update main table if for current hospital
+            if (hospitalCode === currentHospitalCode) {
+                renderMedicineTable(hospitalsData[hospitalCode]);
+            }
+        }
+        
+        // Delete medicine
+        function deleteMedicine(hospitalCode, medId) {
+            if (!confirm('Are you sure you want to delete this medicine?')) {
+                return;
+            }
+            
+            hospitalsData[hospitalCode] = hospitalsData[hospitalCode].filter(med => med.id !== medId);
+            
+            // Update medicines list
+            renderAdminMedicinesList(hospitalCode);
+            
+            // Update main table if for current hospital
+            if (hospitalCode === currentHospitalCode) {
+                renderMedicineTable(hospitalsData[hospitalCode]);
+            }
         }
         
         // Initialize the app when the page loads
@@ -636,9 +776,13 @@
         // Make functions available globally for onclick attributes
         window.updateRowTotal = updateRowTotal;
         window.logout = logout;
-        window.openAdmin = openAdmin;
-        window.closeAdmin = closeAdmin;
+        window.openAdminAccess = openAdminAccess;
+        window.closeAdminAccess = closeAdminAccess;
+        window.verifyAdminAccess = verifyAdminAccess;
+        window.openAdminPanel = openAdminPanel;
+        window.closeAdminPanel = closeAdminPanel;
         window.addMedicine = addMedicine;
+        window.deleteMedicine = deleteMedicine;
         window.addToCart = addToCart;
     </script>
 </body>
